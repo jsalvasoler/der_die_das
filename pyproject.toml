@@ -27,6 +27,7 @@ classifiers = [
 dependencies = [
     "click",
     "pandas",
+    "scikit-learn",
 ]
 
 [project.urls]
