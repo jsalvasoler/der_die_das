@@ -24,7 +24,10 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = []
+dependencies = [
+    "click",
+    "pandas",
+]
 
 [project.urls]
 Documentation = "https://github.com/jsalvasoler/der-die-das#readme"
@@ -40,6 +43,10 @@ extra-dependencies = [
 ]
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive {args:src/der_die_das tests}"
+
+[tool.hatch.envs.default.scripts]
+interactive = "ipython"
+der_die_das = "python3 -m der_die_das {args}"
 
 [tool.coverage.run]
 source_pkgs = ["der_die_das", "tests"]
