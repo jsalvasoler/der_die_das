@@ -28,6 +28,7 @@ dependencies = [
     "click",
     "pandas",
     "scikit-learn",
+    "torch",
 ]
 
 [project.urls]
@@ -88,4 +89,5 @@ extend-select = [
 ]
 ignore = [
     "T201",
+    "ANN101",
 ]

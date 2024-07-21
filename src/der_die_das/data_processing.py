@@ -3,9 +3,9 @@ import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-this_directory = os.path.dirname(__file__)
+from der_die_das.utils import DATA_DIR
 
-DATA_DIR = os.path.join(this_directory, "..", "..", "data")
+this_directory = os.path.dirname(__file__)
 
 
 def from_raw_to_processed() -> None:
@@ -51,8 +51,9 @@ def split_tran_and_test() -> None:
     test_df.to_csv(os.path.join(DATA_DIR, "test.csv"), index=False)
 
 
-def process_data(*, rerun_raw_to_processed: bool = False) -> None:
+def process_data(*, rerun_raw_to_processed: bool = False, rerun_train_test_split: bool = False) -> None:
     if not os.path.exists(os.path.join(DATA_DIR, "german_words_processed.csv")) or rerun_raw_to_processed:
         from_raw_to_processed()
 
-    split_tran_and_test()
+    if not os.path.exists(os.path.join(DATA_DIR, "train.csv")) or rerun_train_test_split:
+        split_tran_and_test()
