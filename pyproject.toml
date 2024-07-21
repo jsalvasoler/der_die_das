@@ -41,6 +41,7 @@ path = "src/der_die_das/__about__.py"
 [tool.hatch.envs.types]
 extra-dependencies = [
   "mypy>=1.0.0",
+  "ruff",
 ]
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive {args:src/der_die_das tests}"
@@ -66,4 +67,22 @@ exclude_lines = [
   "no cov",
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
+]
+
+[tool.ruff.lint]
+extend-select = [ru
+    "I", # isort
+    "F", # PyFlakes
+    "E", # pycodestyle
+    "ANN", # flake8-annotations
+    "B", # flake8-bugbear
+    "ASYNC", # flake8-async
+    "UP", # pyupgrade
+    "N", # pep8-naming
+    "FBT", # flake8-boolean-trap
+    "A", # flake8-builtins
+    "C4", # flake8-comprehensions
+]
+ignore = [
+    "T201",
 ]
