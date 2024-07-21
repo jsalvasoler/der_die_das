@@ -46,6 +46,9 @@ extra-dependencies = [
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive {args:src/der_die_das tests}"
 
+[tool.hatch.envs.default]
+python = "3.11"
+
 [tool.hatch.envs.default.scripts]
 interactive = "ipython"
 der_die_das = "python3 -m der_die_das {args}"
@@ -70,7 +73,7 @@ exclude_lines = [
 ]
 
 [tool.ruff.lint]
-extend-select = [ru
+extend-select = [
     "I", # isort
     "F", # PyFlakes
     "E", # pycodestyle
