@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 
 import pandas as pd
@@ -30,6 +32,13 @@ class TransformerClassifier(nn.Module):
         x = x.mean(dim=1)  # Global average pooling
         return self.fc(x)
 
-    def save_model(self) -> None:
+    def save_model(self, epoch_losses: list[float]) -> None:
         timestamp = pd.Timestamp.now().strftime("%Y%m%d%H%M%S")
-        torch.save(self.state_dict(), os.path.join(MODEL_DIR, f"model_{timestamp}.pt"))
+        model_dir = os.path.join(MODEL_DIR, f"model_{timestamp}")
+        os.makedirs(model_dir, exist_ok=True)
+
+        torch.save(self.state_dict(), os.path.join(model_dir, f"model_{timestamp}.pt"))
+
+        with open(os.path.join(model_dir, "epoch_losses.txt"), "w") as f:
+            for loss in epoch_losses:
+                f.write(f"{loss}\n")

@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 
 import torch
+from matplotlib import pyplot as plt
 from sklearn.metrics import (
     ConfusionMatrixDisplay,
     accuracy_score,
@@ -23,22 +24,21 @@ def evaluate(model_timestamp: str | None = None) -> None:
     dataloader = DataLoader(dataset, batch_size=32, shuffle=False)
 
     # Load the model
-    models = os.listdir(MODEL_DIR)
-    models = [model for model in models if model.endswith(".pt")]
+    model_dirs = os.listdir(MODEL_DIR)
 
     if model_timestamp is not None:
         assert len(model_timestamp) == len("YYYYMMDDHHMMSS"), "Model timestamp should have the format YYYYMMDDHHMMSS"
         try:
-            model = next(model for model in models if model_timestamp in model)
+            model_dir = next(model_dir for model_dir in model_dirs if model_timestamp in model_dir)
         except StopIteration:
             print(f"No model found with timestamp {model_timestamp}")
             return
     else:
-        models = sorted(models, reverse=True, key=lambda x: x.split("_")[1])
-        model = models[0]
+        models = sorted(model_dirs, reverse=True, key=lambda x: x.split("_")[1])
+        model_dir = models[0]
 
-    model_timestamp = model.split("_")[1].split(".")[0]
-    model_path = os.path.join(MODEL_DIR, model)
+    model_timestamp = model_dir.split("_")[1].split(".")[0]
+    model_path = os.path.join(MODEL_DIR, model_dir, f"model_{model_timestamp}.pt")
     state_dict = torch.load(model_path)
 
     model = TransformerClassifier(
@@ -87,3 +87,17 @@ def evaluate(model_timestamp: str | None = None) -> None:
     with open(os.path.join(eval_dir, f"metrics_{model_timestamp}.txt"), "ab") as f:
         f.write(b"\n")
         cm.tofile(f, sep=",")
+
+    # plot the learning curve and save it
+    model_dir = os.path.join(MODEL_DIR, f"model_{model_timestamp}")
+    with open(os.path.join(model_dir, "epoch_losses.txt")) as f:
+        epoch_losses = [float(line.strip()) for line in f]
+
+    # Plot the learning curve
+    # reset the pyplot figure
+    plt.clf()
+    plt.plot(epoch_losses)
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.title("Learning Curve")
+    plt.savefig(os.path.join(eval_dir, f"learning_curve_{model_timestamp}.png"))

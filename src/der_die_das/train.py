@@ -19,7 +19,9 @@ def train() -> None:
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
 
-    for epoch in range(3):
+    epoch_losses = []
+
+    for epoch in range(2):
         running_loss = 0.0
 
         for batch_words, batch_labels in dataloader:
@@ -33,6 +35,7 @@ def train() -> None:
 
         scheduler.step()
 
-        print(f"Epoch {epoch + 1}, Running loss: {running_loss / len(dataloader)}, Loss: {loss.item()}")
+        print(f"Epoch {epoch + 1}, Loss: {running_loss / len(dataloader)}")
+        epoch_losses.append(running_loss / len(dataloader))
 
-    model.save_model()
+    model.save_model(epoch_losses)
