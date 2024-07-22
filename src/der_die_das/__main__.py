@@ -21,9 +21,17 @@ def process_data_command(*, rerun_raw_to_processed: bool, rerun_train_test_split
 
 
 @cli.command(name="train", help="Train the model")
-def train_command() -> None:
+@click.option("--batch_size", type=int, help="The batch size for training")
+@click.option("--lr", type=float, help="The learning rate for training")
+@click.option("--step_size", type=int, help="The step size for the learning rate scheduler")
+@click.option("--gamma", type=float, help="The gamma for the learning rate scheduler")
+@click.option("--num_epochs", type=int, help="The number of epochs for training")
+def train_command(batch_size: int, lr: float, step_size: int, gamma: float, num_epochs: int) -> None:
     click.echo("Training the model")
-    train()
+
+    settings = {k: v for k, v in locals().items() if v is not None}
+
+    train(settings)
 
 
 @cli.command(name="evaluate", help="Evaluate the model")
