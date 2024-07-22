@@ -2,5 +2,5 @@
 __pycache__/
 
 # ignore the eval_results and models directories
-eval_results/
+evaluations/
 models/
