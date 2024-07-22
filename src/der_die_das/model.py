@@ -42,3 +42,8 @@ class TransformerClassifier(nn.Module):
         with open(os.path.join(model_dir, "epoch_losses.txt"), "w") as f:
             for loss in epoch_losses:
                 f.write(f"{loss}\n")
+
+        with open(os.path.join(model_dir, "settings.txt"), "w") as f:
+            f.write("Settings used for training:\n")
+            for k, v in self.settings.items():
+                f.write(f"{k}: {v}\n")
