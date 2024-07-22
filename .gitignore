@@ -1,3 +1,6 @@
 # ignore all __pycache__ directories
 __pycache__/
 
+# ignore the eval_results and models directories
+eval_results/
+models/

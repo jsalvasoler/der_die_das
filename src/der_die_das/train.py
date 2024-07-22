@@ -1,19 +1,24 @@
 from __future__ import annotations
 
 import os
-from typing import ClassVar
 
 import pandas as pd
 import torch
 from torch import nn, optim
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 
-from der_die_das.utils import DATA_DIR, MODEL_DIR
+from der_die_das.utils import MODEL_DIR, GermanNouns
 
 
 class TransformerClassifier(nn.Module):
     def __init__(
-        self, vocab_size: int, embed_dim: int, num_heads: int, num_layers: int, max_length: int, num_classes: int
+        self,
+        vocab_size: int,
+        max_length: int,
+        num_classes: int,
+        embed_dim: int = 128,
+        num_heads: int = 8,
+        num_layers: int = 2,
     ) -> None:
         super().__init__()
         self.embedding = nn.Embedding(vocab_size, embed_dim)
@@ -33,47 +38,13 @@ class TransformerClassifier(nn.Module):
         torch.save(self.state_dict(), os.path.join(MODEL_DIR, f"model_{timestamp}.pt"))
 
 
-class GermanNouns(Dataset):
-    CHAR_TO_IDX: ClassVar = {char: idx for idx, char in enumerate("abcdefghijklmnopqrstuvwxyzäöüß-")}
-
-    def __init__(self) -> None:
-        df = pd.read_csv(os.path.join(DATA_DIR, "train.csv"))
-        test = pd.read_csv(os.path.join(DATA_DIR, "train.csv"))
-        self.max_length = max(df["x"].str.len().max(), test["x"].str.len().max())
-
-        self.words = self.encode_words(df["x"].values)
-        self.labels = df["y"].values
-        self.vocab_size = len(self.CHAR_TO_IDX)
-
-    def encode_words(self, words: list[str]) -> list[list[int]]:
-        encoded_words = []
-        for word in words:
-            encoded = [self.CHAR_TO_IDX[char] for char in word]
-            encoded += [0] * (self.max_length - len(word))
-            encoded = torch.tensor(encoded)
-            encoded_words.append(encoded)
-
-        return encoded_words
-
-    def __len__(self) -> int:
-        return len(self.words)
-
-    def __getitem__(self, idx: int) -> tuple[list, int]:
-        return self.words[idx], self.labels[idx]
-
-
 def train() -> None:
     dataset = GermanNouns()
     dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 
-    vocab_size = dataset.vocab_size
-    embed_dim = 128
-    num_heads = 8
-    num_layers = 2
-    max_length = dataset.max_length
-    num_classes = len(set(dataset.labels))
-
-    model = TransformerClassifier(vocab_size, embed_dim, num_heads, num_layers, max_length, num_classes)
+    model = TransformerClassifier(
+        vocab_size=dataset.vocab_size, max_length=dataset.max_length, num_classes=len(set(dataset.labels))
+    )
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)

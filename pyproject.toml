@@ -90,4 +90,5 @@ extend-select = [
 ignore = [
     "T201",
     "ANN101",
+    "S101"
 ]

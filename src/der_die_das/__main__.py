@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import click
 
 from der_die_das.data_processing import process_data
+from der_die_das.evaluate import evaluate
 from der_die_das.train import train
 
 
@@ -21,6 +24,16 @@ def process_data_command(*, rerun_raw_to_processed: bool, rerun_train_test_split
 def train_command() -> None:
     click.echo("Training the model")
     train()
+
+
+@cli.command(name="evaluate", help="Evaluate the model")
+@click.option(
+    "--model_time_stamp",
+    help="The timestamp of the model to evaluate. If not provided, the latest model will be evaluated",
+)
+def evaluate_command(model_time_stamp: str | None) -> None:
+    click.echo("Evaluating the model")
+    evaluate(model_time_stamp)
 
 
 if __name__ == "__main__":
