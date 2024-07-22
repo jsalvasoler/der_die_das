@@ -52,7 +52,7 @@ def evaluate(model_timestamp: str | None = None) -> None:
 
     with torch.no_grad():
         for batch_words, batch_labels in dataloader:
-            outputs = model(torch.tensor(batch_words))
+            outputs = model(batch_words)
             _, preds = torch.max(outputs, 1)
 
             all_preds.extend(preds.cpu().numpy())
@@ -91,13 +91,23 @@ def evaluate(model_timestamp: str | None = None) -> None:
     # plot the learning curve and save it
     model_dir = os.path.join(MODEL_DIR, f"model_{model_timestamp}")
     with open(os.path.join(model_dir, "epoch_losses.txt")) as f:
-        epoch_losses = [float(line.strip()) for line in f]
+        epoch_losses = [line.strip().split(",") for line in f.readlines()]
+        epoch_losses = [[float(train_loss), float(eval_loss)] for train_loss, eval_loss in epoch_losses]
 
-    # Plot the learning curve
-    # reset the pyplot figure
     plt.clf()
-    plt.plot(epoch_losses)
-    plt.xlabel("Epoch")
-    plt.ylabel("Loss")
+
+    train_losses = [loss[0] for loss in epoch_losses]
+    eval_losses = [loss[1] for loss in epoch_losses]
+
+    # Plot the learning curve on two different axis
+    fig, ax1 = plt.subplots()
+
+    ax1.set_xlabel("Epoch")
+    ax1.set_ylabel("Loss", color="tab:blue")
+    ax1.plot(range(1, len(train_losses) + 1), train_losses, color="tab:blue", label="Train Loss")
+    ax1.plot(range(1, len(eval_losses) + 1), eval_losses, color="tab:orange", label="Eval Loss")
+    ax1.tick_params(axis="y", labelcolor="tab:blue")
+    ax1.legend(loc="upper left")
+
     plt.title("Learning Curve")
     plt.savefig(os.path.join(eval_dir, f"learning_curve_{model_timestamp}.png"))

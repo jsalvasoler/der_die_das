@@ -1,29 +1,26 @@
 from __future__ import annotations
 
-import torch
 from torch import nn, optim
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 
-from der_die_das.model import TransformerClassifier
+from der_die_das.model import Config, TransformerClassifier
 from der_die_das.utils import GermanNouns
 
 
-class Config:
-    def __init__(self, settings: dict) -> None:
-        self.batch_size = settings.get("batch_size", 32)
-        self.lr = settings.get("lr", 0.001)
-        self.step_size = settings.get("step_size", 10)
-        self.gamma = settings.get("gamma", 0.1)
-        self.num_epochs = settings.get("num_epochs", 2)
-
-
 def train(settings: dict) -> None:
-    print(f"Using the following settings: {settings}")
-
     config = Config(settings)
+    print(config.__dict__)
 
     dataset = GermanNouns()
-    dataloader = DataLoader(dataset, batch_size=config.batch_size, shuffle=True)
+
+    eval_samples = int(len(dataset) * config.val_size)
+    train_samples = len(dataset) - eval_samples
+
+    print(f"Training samples: {train_samples}, Evaluation samples: {eval_samples}")
+
+    train, val = random_split(dataset, [train_samples, eval_samples])
+    train_loader = DataLoader(train, batch_size=config.batch_size, shuffle=True)
+    eval_loader = DataLoader(val, batch_size=config.batch_size, shuffle=False)
 
     model = TransformerClassifier(
         vocab_size=dataset.vocab_size, max_length=dataset.max_length, num_classes=len(set(dataset.labels))
@@ -33,22 +30,44 @@ def train(settings: dict) -> None:
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=config.step_size, gamma=config.gamma)
 
     epoch_losses = []
+    min_val_loss = float("inf")
+    epoch_min_loss = 0
 
     for epoch in range(config.num_epochs):
-        running_loss = 0.0
+        train_loss = 0.0
 
-        for batch_words, batch_labels in dataloader:
+        for batch_words, batch_labels in train_loader:
             optimizer.zero_grad()
-            outputs = model(torch.tensor(batch_words))
-            loss = criterion(outputs, torch.tensor(batch_labels))
+            outputs = model(batch_words)
+            loss = criterion(outputs, batch_labels)
             loss.backward()
             optimizer.step()
 
-            running_loss += loss.item()
+            train_loss += loss.item()
 
         scheduler.step()
 
-        print(f"Epoch {epoch + 1}, Loss: {running_loss / len(dataloader)}")
-        epoch_losses.append(running_loss / len(dataloader))
+        eval_loss = 0.0
 
-    model.save_model(epoch_losses)
+        for batch_words, batch_labels in eval_loader:
+            outputs = model(batch_words)
+            loss = criterion(outputs, batch_labels)
+            eval_loss += loss.item()
+
+        eval_loss_epoch = eval_loss / len(eval_loader) if len(eval_loader) > 0 else 0
+        if config.early_stop is not None:
+            if eval_loss_epoch < min_val_loss:
+                min_val_loss = eval_loss_epoch
+                epoch_min_loss = 0
+            else:
+                epoch_min_loss += 1
+
+            if epoch_min_loss == config.early_stop:
+                print(f"Early stopping at epoch {epoch + 1}")
+                break
+
+        epoch_losses.append((train_loss / len(train_loader), eval_loss_epoch))
+
+        print(f"Epoch {epoch + 1}, Loss: {train_loss / len(train_loader)}, Val Loss: {eval_loss_epoch}")
+
+    model.save_model(epoch_losses, config)

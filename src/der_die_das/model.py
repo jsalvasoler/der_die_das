@@ -8,6 +8,25 @@ from torch import nn
 
 from der_die_das.utils import MODEL_DIR
 
+DEFAULT_SETTINGS = {
+    "batch_size": 32,
+    "lr": 0.001,
+    "step_size": 10,
+    "gamma": 0.1,
+    "num_epochs": 30,
+    "val_size": 0.2,
+    "early_stop": None,
+}
+
+
+class Config:
+    def __init__(self, settings: dict) -> None:
+        for k, v in DEFAULT_SETTINGS.items():
+            setattr(self, k, settings.get(k, v))
+
+        if self.early_stop is None:
+            self.val_size = 0
+
 
 class TransformerClassifier(nn.Module):
     def __init__(
@@ -32,7 +51,7 @@ class TransformerClassifier(nn.Module):
         x = x.mean(dim=1)  # Global average pooling
         return self.fc(x)
 
-    def save_model(self, epoch_losses: list[float]) -> None:
+    def save_model(self, epoch_losses: list[float], config: Config) -> None:
         timestamp = pd.Timestamp.now().strftime("%Y%m%d%H%M%S")
         model_dir = os.path.join(MODEL_DIR, f"model_{timestamp}")
         os.makedirs(model_dir, exist_ok=True)
@@ -40,10 +59,10 @@ class TransformerClassifier(nn.Module):
         torch.save(self.state_dict(), os.path.join(model_dir, f"model_{timestamp}.pt"))
 
         with open(os.path.join(model_dir, "epoch_losses.txt"), "w") as f:
-            for loss in epoch_losses:
-                f.write(f"{loss}\n")
+            for train_loss, eval_loss in epoch_losses:
+                f.write(f"{train_loss},{eval_loss}\n")
 
         with open(os.path.join(model_dir, "settings.txt"), "w") as f:
             f.write("Settings used for training:\n")
-            for k, v in self.settings.items():
+            for k, v in config.__dict__.items():
                 f.write(f"{k}: {v}\n")

@@ -26,7 +26,21 @@ def process_data_command(*, rerun_raw_to_processed: bool, rerun_train_test_split
 @click.option("--step_size", type=int, help="The step size for the learning rate scheduler")
 @click.option("--gamma", type=float, help="The gamma for the learning rate scheduler")
 @click.option("--num_epochs", type=int, help="The number of epochs for training")
-def train_command(batch_size: int, lr: float, step_size: int, gamma: float, num_epochs: int) -> None:
+@click.option(
+    "--val_size",
+    type=float,
+    help="The size of the validation set as a fraction of the training set."
+    " If not provided, no validation set is used",
+)
+@click.option(
+    "--early_stop",
+    type=int,
+    help="The number of epochs to wait before stopping training if the validation loss does not decrease."
+    " If not provided, early stopping is not used",
+)
+def train_command(
+    batch_size: int, lr: float, step_size: int, gamma: float, num_epochs: int, val_size: float, early_stop: int | None
+) -> None:
     click.echo("Training the model")
 
     settings = {k: v for k, v in locals().items() if v is not None}
