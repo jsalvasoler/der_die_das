@@ -30,6 +30,7 @@ dependencies = [
     "scikit-learn",
     "torch",
     "matplotlib",
+    "deep-translator",
 ]
 
 [project.urls]

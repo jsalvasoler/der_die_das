@@ -29,10 +29,15 @@ def from_raw_to_processed() -> None:
     words_df.to_csv(os.path.join(DATA_DIR, "german_words_processed.csv"), index=False)
 
 
-def split_tran_and_test() -> None:
-    words_df = pd.read_csv(os.path.join(DATA_DIR, "german_words_processed.csv"))
+def split_train_and_test(language: str) -> None:
+    assert language in ["german", "catalan"]
+    if language == "german":
+        words_df = pd.read_csv(os.path.join(DATA_DIR, "german_words_processed.csv"))
+    elif language == "catalan":
+        words_df = pd.read_csv(os.path.join(DATA_DIR, "catalan_words_processed.csv"))
 
     words_df["length"] = words_df["x"].str.len()
+    print(words_df[words_df["length"].isna()])
 
     words_df["length"] = words_df["length"].clip(lower=3, upper=13)
 
@@ -47,13 +52,82 @@ def split_tran_and_test() -> None:
     train_df = train_df[["x", "y"]]
     test_df = test_df[["x", "y"]]
 
-    train_df.to_csv(os.path.join(DATA_DIR, "train.csv"), index=False)
-    test_df.to_csv(os.path.join(DATA_DIR, "test.csv"), index=False)
+    train_name = "train.csv" if language == "german" else "train_cat.csv"
+    test_name = "test.csv" if language == "german" else "test_cat.csv"
+    train_df.to_csv(os.path.join(DATA_DIR, train_name), index=False)
+    test_df.to_csv(os.path.join(DATA_DIR, test_name), index=False)
 
 
-def process_data(*, rerun_raw_to_processed: bool = False, rerun_train_test_split: bool = False) -> None:
-    if not os.path.exists(os.path.join(DATA_DIR, "german_words_processed.csv")) or rerun_raw_to_processed:
-        from_raw_to_processed()
+def process_data(language: str, *, rerun_raw_to_processed: bool = False, rerun_train_test_split: bool = False) -> None:
+    if language == "german":
+        if not os.path.exists(os.path.join(DATA_DIR, "german_words_processed.csv")) or rerun_raw_to_processed:
+            from_raw_to_processed()
+        if not os.path.exists(os.path.join(DATA_DIR, "train.csv")) or rerun_train_test_split:
+            split_train_and_test(language=language)
+    elif language == "catalan":
+        if not os.path.exists(os.path.join(DATA_DIR, "catalan_words_processed.csv")) or rerun_raw_to_processed:
+            from_raw_to_processed_catalan()
+        if not os.path.exists(os.path.join(DATA_DIR, "train_cat.csv")) or rerun_train_test_split:
+            split_train_and_test(language=language)
 
-    if not os.path.exists(os.path.join(DATA_DIR, "train.csv")) or rerun_train_test_split:
-        split_tran_and_test()
+
+def translate_german_to_catalan() -> None:
+    words_df = pd.read_csv(os.path.join(DATA_DIR, "german_words_processed.csv"))
+
+    from deep_translator import MicrosoftTranslator
+
+    translator = MicrosoftTranslator(
+        source="de", target="ca", api_key="f8937130a4574616a8f61b0e50bf03a5", region="italynorth"
+    )
+
+    words_df["sing+plural"] = words_df["singular"] + ", " + words_df["plural"]
+    words_df["catalan"] = translator.translate_batch(words_df["sing+plural"].values.tolist())
+
+    words_df.to_csv(os.path.join(DATA_DIR, "catalan_words_processed.csv"), index=False)
+
+
+def from_raw_to_processed_catalan() -> None:
+    words_df = pd.read_csv(os.path.join(DATA_DIR, "catalan_words_raw.csv"))
+
+    words_df[["singular", "plural"]] = words_df["catalan"].str.split(", ", expand=True)
+    words_df["singular"] = words_df["singular"].str.lower().str.replace("l'", " ")
+    words_df[["sing_article", "sing_noun"]] = words_df["singular"].str.split(" ", n=1, expand=True)
+    words_df["plural"] = words_df["plural"].str.lower().str.replace("l'", " ")
+    words_df[["plur_article", "plur_noun"]] = words_df["plural"].str.split(" ", n=1, expand=True)
+
+    def get_article(row: pd.Series) -> int:
+        assert row["sing_article"] in ["el", "la"] or row["plur_article"] in ["els", "les"]
+        if row["sing_article"] == "el":
+            return 0
+        if row["sing_article"] == "la":
+            return 1
+        if row["plur_article"] == "els":
+            return 0
+        if row["plur_article"] == "les":
+            return 1
+        return -1
+
+    words_df["y"] = words_df.apply(get_article, axis=1)
+    words_df["x"] = words_df["sing_noun"]
+
+    # remove " - " from the words
+    words_df["x"] = words_df["x"].str.replace("-", "").str.strip()
+    # if the word has a space, take the first word
+    words_df["x"] = words_df["x"].str.split(" ").str[0]
+
+    words_df = words_df[["english", "x", "y"]]
+
+    # remove duplicates
+    print(f"Number of words before removing duplicates: {len(words_df)}")
+    words_df.drop_duplicates(subset=["x"], inplace=True)
+    print(f"Number of words after removing duplicates: {len(words_df)}")
+
+    words_df.to_csv(os.path.join(DATA_DIR, "catalan_words_processed.csv"), index=False)
+
+
+def split_train_and_test_catalan() -> None:
+    pass
+
+
+if __name__ == "__main__":
+    translate_german_to_catalan()
