@@ -14,14 +14,17 @@ MODEL_DIR = os.path.join(this_directory, "..", "..", "models")
 EVAL_DIR = os.path.join(this_directory, "..", "..", "evaluations")
 
 
-class GermanNouns(Dataset):
-    CHAR_TO_IDX: ClassVar = {char: idx for idx, char in enumerate("abcdefghijklmnopqrstuvwxyzäöüß-")}
+class NounsDataset(Dataset):
+    CHAR_TO_IDX: ClassVar = {char: idx for idx, char in enumerate("abcdefghijklmnopqrstuvwxyzäöüß-àèéíòóúï·ç")}
 
-    def __init__(self, which: str = "train") -> None:
+    def __init__(self, language: str, which: str = "train") -> None:
+        assert language in ["german", "catalan"]
         assert which in ["train", "test"]
 
-        train = pd.read_csv(os.path.join(DATA_DIR, "train.csv"))
-        test = pd.read_csv(os.path.join(DATA_DIR, "train.csv"))
+        train_name = "train.csv" if language == "german" else "train_cat.csv"
+        test_name = "test.csv" if language == "german" else "test_cat.csv"
+        train = pd.read_csv(os.path.join(DATA_DIR, train_name))
+        test = pd.read_csv(os.path.join(DATA_DIR, test_name))
 
         self.max_length = max(train["x"].str.len().max(), test["x"].str.len().max())
         self.vocab_size = len(self.CHAR_TO_IDX)

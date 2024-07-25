@@ -4,14 +4,16 @@ from torch import nn, optim
 from torch.utils.data import DataLoader, random_split
 
 from der_die_das.model import Config, TransformerClassifier
-from der_die_das.utils import GermanNouns
+from der_die_das.utils import NounsDataset
 
 
 def train(settings: dict) -> None:
-    config = Config(settings)
+    language = settings.pop("language")
+
+    config = Config(settings, language=language)
     print(config.__dict__)
 
-    dataset = GermanNouns()
+    dataset = NounsDataset(language=language)
 
     eval_samples = int(len(dataset) * config.val_size)
     train_samples = len(dataset) - eval_samples

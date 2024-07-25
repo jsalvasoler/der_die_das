@@ -15,14 +15,10 @@ from sklearn.metrics import (
 from torch.utils.data import DataLoader
 
 from der_die_das.model import TransformerClassifier
-from der_die_das.utils import EVAL_DIR, MODEL_DIR, GermanNouns
+from der_die_das.utils import EVAL_DIR, MODEL_DIR, NounsDataset
 
 
 def evaluate(model_timestamp: str | None = None) -> None:
-    # Prepare the test dataset
-    dataset = GermanNouns(which="test")
-    dataloader = DataLoader(dataset, batch_size=32, shuffle=False)
-
     # Load the model
     model_dirs = os.listdir(MODEL_DIR)
 
@@ -40,6 +36,15 @@ def evaluate(model_timestamp: str | None = None) -> None:
     model_timestamp = model_dir.split("_")[1].split(".")[0]
     model_path = os.path.join(MODEL_DIR, model_dir, f"model_{model_timestamp}.pt")
     state_dict = torch.load(model_path)
+
+    # Prepare the test dataset
+    # read settings.txt to get the language
+    with open(os.path.join(MODEL_DIR, model_dir, "settings.txt")) as f:
+        settings = {line.split(":")[0]: line.split(":")[1].strip() for line in f.readlines()}
+        language = settings["language"]
+    dataset = NounsDataset(language=language, which="test")
+
+    dataloader = DataLoader(dataset, batch_size=32, shuffle=False)
 
     model = TransformerClassifier(
         vocab_size=dataset.vocab_size, max_length=dataset.max_length, num_classes=len(set(dataset.labels))
@@ -73,7 +78,8 @@ def evaluate(model_timestamp: str | None = None) -> None:
     os.makedirs(eval_dir, exist_ok=True)
 
     cm = confusion_matrix(all_labels, all_preds)
-    display = ConfusionMatrixDisplay(cm, display_labels=["der", "die", "das"])
+    labels = ["der", "die", "das"] if language == "german" else ["el", "la"]
+    display = ConfusionMatrixDisplay(cm, display_labels=labels)
     display.plot().figure_.savefig(os.path.join(eval_dir, f"confusion_matrix_{model_timestamp}.png"))
 
     # save metrics to file

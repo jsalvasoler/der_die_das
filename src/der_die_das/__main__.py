@@ -24,6 +24,9 @@ def process_data_command(language: str, *, rerun_raw_to_processed: bool, rerun_t
 
 
 @cli.command(name="train", help="Train the model")
+@click.option(
+    "--language", help="The language to train the model for", type=click.Choice(["german", "catalan"]), required=True
+)
 @click.option("--batch_size", type=int, help="The batch size for training")
 @click.option("--lr", type=float, help="The learning rate for training")
 @click.option("--step_size", type=int, help="The step size for the learning rate scheduler")
@@ -42,7 +45,14 @@ def process_data_command(language: str, *, rerun_raw_to_processed: bool, rerun_t
     " If not provided, early stopping is not used",
 )
 def train_command(
-    batch_size: int, lr: float, step_size: int, gamma: float, num_epochs: int, val_size: float, early_stop: int | None
+    language: str,
+    batch_size: int,
+    lr: float,
+    step_size: int,
+    gamma: float,
+    num_epochs: int,
+    val_size: float,
+    early_stop: int | None,
 ) -> None:
     click.echo("Training the model")
 

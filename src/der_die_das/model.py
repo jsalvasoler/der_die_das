@@ -20,12 +20,14 @@ DEFAULT_SETTINGS = {
 
 
 class Config:
-    def __init__(self, settings: dict) -> None:
+    def __init__(self, settings: dict, language: str) -> None:
         for k, v in DEFAULT_SETTINGS.items():
             setattr(self, k, settings.get(k, v))
 
         if self.early_stop is None:
             self.val_size = 0
+
+        self.language = language
 
 
 class TransformerClassifier(nn.Module):
