@@ -15,7 +15,7 @@ from sklearn.metrics import (
 from torch.utils.data import DataLoader
 
 from der_die_das.model import TransformerClassifier
-from der_die_das.utils import EVAL_DIR, MODEL_DIR, NounsDataset
+from der_die_das.utils import EVAL_DIR, LANGUAGES, MODEL_DIR, NounsDataset
 
 
 def evaluate(model_timestamp: str | None = None) -> None:
@@ -42,6 +42,7 @@ def evaluate(model_timestamp: str | None = None) -> None:
     with open(os.path.join(MODEL_DIR, model_dir, "settings.txt")) as f:
         settings = {line.split(":")[0]: line.split(":")[1].strip() for line in f.readlines()}
         language = settings["language"]
+        assert language in LANGUAGES
     dataset = NounsDataset(language=language, which="test")
 
     dataloader = DataLoader(dataset, batch_size=32, shuffle=False)
@@ -78,7 +79,12 @@ def evaluate(model_timestamp: str | None = None) -> None:
     os.makedirs(eval_dir, exist_ok=True)
 
     cm = confusion_matrix(all_labels, all_preds)
-    labels = ["der", "die", "das"] if language == "german" else ["el", "la"]
+    if language == "german":
+        labels = ["der", "die", "das"]
+    elif language == "catalan":
+        labels = ["el", "la"]
+    elif language == "croatian":
+        labels = ["masc", "fem", "neut"]
     display = ConfusionMatrixDisplay(cm, display_labels=labels)
     display.plot().figure_.savefig(os.path.join(eval_dir, f"confusion_matrix_{model_timestamp}.png"))
 
