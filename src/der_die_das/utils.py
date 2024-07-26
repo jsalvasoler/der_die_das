@@ -14,17 +14,24 @@ MODEL_DIR = os.path.join(this_directory, "..", "..", "models")
 EVAL_DIR = os.path.join(this_directory, "..", "..", "evaluations")
 
 
+DATASET_NAMES = {
+    "german": ["train.csv", "test.csv"],
+    "catalan": ["train_cat.csv", "test_cat.csv"],
+    "croatian": ["train_cro.csv", "test_cro.csv"],
+}
+
+LANGUAGES = ["german", "catalan", "croatian"]
+
+
 class NounsDataset(Dataset):
-    CHAR_TO_IDX: ClassVar = {char: idx for idx, char in enumerate("abcdefghijklmnopqrstuvwxyzäöüß-àèéíòóúï·ç")}
+    CHAR_TO_IDX: ClassVar = {char: idx for idx, char in enumerate("abcdefghijklmnopqrstuvwxyzäöüß-àèéíòóúï·çšđžčć")}
 
     def __init__(self, language: str, which: str = "train") -> None:
-        assert language in ["german", "catalan"]
+        assert language in LANGUAGES
         assert which in ["train", "test"]
 
-        train_name = "train.csv" if language == "german" else "train_cat.csv"
-        test_name = "test.csv" if language == "german" else "test_cat.csv"
-        train = pd.read_csv(os.path.join(DATA_DIR, train_name))
-        test = pd.read_csv(os.path.join(DATA_DIR, test_name))
+        train = pd.read_csv(os.path.join(DATA_DIR, DATASET_NAMES[language][0]))
+        test = pd.read_csv(os.path.join(DATA_DIR, DATASET_NAMES[language][1]))
 
         self.max_length = max(train["x"].str.len().max(), test["x"].str.len().max())
         self.vocab_size = len(self.CHAR_TO_IDX)

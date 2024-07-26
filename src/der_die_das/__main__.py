@@ -5,8 +5,7 @@ import click
 from der_die_das.data_processing import process_data
 from der_die_das.evaluate import evaluate
 from der_die_das.train import train
-
-LANGUAGES = ["german", "catalan", "croatian"]
+from der_die_das.utils import LANGUAGES
 
 
 @click.group()
