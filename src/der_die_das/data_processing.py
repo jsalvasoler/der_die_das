@@ -30,16 +30,19 @@ def from_raw_to_processed() -> None:
 
 
 def split_train_and_test(language: str) -> None:
-    assert language in ["german", "catalan"]
     if language == "german":
         words_df = pd.read_csv(os.path.join(DATA_DIR, "german_words_processed.csv"))
     elif language == "catalan":
         words_df = pd.read_csv(os.path.join(DATA_DIR, "catalan_words_processed.csv"))
+    elif language == "croatian":
+        words_df = pd.read_csv(os.path.join(DATA_DIR, "croatian_words_processed.csv"))
 
     words_df["length"] = words_df["x"].str.len()
     print(words_df[words_df["length"].isna()])
 
     words_df["length"] = words_df["length"].clip(lower=3, upper=13)
+    if language == "croatian":
+        words_df["length"] = words_df["length"].clip(lower=3, upper=10)
 
     print(words_df.groupby("length")["length"].count())
 
@@ -52,8 +55,16 @@ def split_train_and_test(language: str) -> None:
     train_df = train_df[["x", "y"]]
     test_df = test_df[["x", "y"]]
 
-    train_name = "train.csv" if language == "german" else "train_cat.csv"
-    test_name = "test.csv" if language == "german" else "test_cat.csv"
+    if language == "german":
+        train_name = "train.csv"
+        test_name = "test.csv"
+    elif language == "catalan":
+        train_name = "train_cat.csv"
+        test_name = "test_cat.csv"
+    elif language == "croatian":
+        train_name = "train_cro.csv"
+        test_name = "test_cro.csv"
+
     train_df.to_csv(os.path.join(DATA_DIR, train_name), index=False)
     test_df.to_csv(os.path.join(DATA_DIR, test_name), index=False)
 
@@ -69,6 +80,11 @@ def process_data(language: str, *, rerun_raw_to_processed: bool = False, rerun_t
             from_raw_to_processed_catalan()
         if not os.path.exists(os.path.join(DATA_DIR, "train_cat.csv")) or rerun_train_test_split:
             split_train_and_test(language=language)
+    elif language == "croatian":
+        if not os.path.exists(os.path.join(DATA_DIR, "croatian_words_processed.csv")) or rerun_raw_to_processed:
+            from_raw_to_processed_croatian()
+        if not os.path.exists(os.path.join(DATA_DIR, "train_cro.csv")) or rerun_train_test_split:
+            split_train_and_test(language=language)
 
 
 def translate_german_to_catalan() -> None:
@@ -83,7 +99,7 @@ def translate_german_to_catalan() -> None:
     words_df["sing+plural"] = words_df["singular"] + ", " + words_df["plural"]
     words_df["catalan"] = translator.translate_batch(words_df["sing+plural"].values.tolist())
 
-    words_df.to_csv(os.path.join(DATA_DIR, "catalan_words_processed.csv"), index=False)
+    words_df.to_csv(os.path.join(DATA_DIR, "catalan_words_raw.csv"), index=False)
 
 
 def from_raw_to_processed_catalan() -> None:
@@ -125,9 +141,51 @@ def from_raw_to_processed_catalan() -> None:
     words_df.to_csv(os.path.join(DATA_DIR, "catalan_words_processed.csv"), index=False)
 
 
-def split_train_and_test_catalan() -> None:
-    pass
+def translate_german_to_croatian() -> None:
+    words_df = pd.read_csv(os.path.join(DATA_DIR, "german_words_processed.csv"))
+
+    from deep_translator import MicrosoftTranslator
+
+    translator = MicrosoftTranslator(
+        source="de", target="hr", api_key="f8937130a4574616a8f61b0e50bf03a5", region="italynorth"
+    )
+
+    words_df["possessive"] = words_df["singular"].apply(
+        lambda x: x.replace("Der ", "Mein ").replace("Die ", "Meine ").replace("Das ", "Mein ")
+    )
+    words_df["croatian"] = translator.translate_batch(words_df["possessive"].values.tolist())
+
+    words_df.to_csv(os.path.join(DATA_DIR, "croatian_words_raw.csv"), index=False)
+
+
+def from_raw_to_processed_croatian() -> None:
+    words_df = pd.read_csv(os.path.join(DATA_DIR, "croatian_words_raw.csv"))
+    words_df["n_words"] = words_df["croatian"].str.split(" ").str.len()
+    words_df = words_df[words_df["n_words"] == 2]  # noqa: PLR2004
+
+    words_df[["possessive", "x"]] = words_df["croatian"].str.lower().str.split(" ", expand=True)
+    words_df = words_df[words_df["possessive"].isin(["moj", "moja", "moje"])]
+
+    def get_gender(possessive: str) -> int:
+        if possessive == "moj":
+            return 0
+        if possessive == "moja":
+            return 1
+        if possessive == "moje":
+            return 2
+        return -1
+
+    words_df["y"] = words_df["possessive"].apply(get_gender)
+    assert set(words_df["y"]) == {"moj", "moja", "moje"}
+
+    # remove duplicates
+    print(f"Number of words before removing duplicates: {len(words_df)}")
+    words_df.drop_duplicates(subset=["x"], inplace=True)
+    print(f"Number of words after removing duplicates: {len(words_df)}")
+
+    words_df.to_csv(os.path.join(DATA_DIR, "croatian_words_processed.csv"), index=False)
 
 
 if __name__ == "__main__":
-    translate_german_to_catalan()
+    # translate_german_to_catalan()
+    translate_german_to_croatian()

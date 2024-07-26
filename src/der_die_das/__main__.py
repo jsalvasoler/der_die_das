@@ -6,6 +6,8 @@ from der_die_das.data_processing import process_data
 from der_die_das.evaluate import evaluate
 from der_die_das.train import train
 
+LANGUAGES = ["german", "catalan", "croatian"]
+
 
 @click.group()
 def cli() -> None:
@@ -13,9 +15,7 @@ def cli() -> None:
 
 
 @cli.command(name="process_data", help="Run the data processing pipeling")
-@click.option(
-    "--language", help="The language to process the data for", type=click.Choice(["german", "catalan"]), required=True
-)
+@click.option("--language", help="The language to process the data for", type=click.Choice(LANGUAGES), required=True)
 @click.option("--rerun_raw_to_processed", is_flag=True, help="Whether to rerun the raw to processed step")
 @click.option("--rerun_train_test_split", is_flag=True, help="Whether to rerun the train test split step")
 def process_data_command(language: str, *, rerun_raw_to_processed: bool, rerun_train_test_split: bool) -> None:
@@ -24,9 +24,7 @@ def process_data_command(language: str, *, rerun_raw_to_processed: bool, rerun_t
 
 
 @cli.command(name="train", help="Train the model")
-@click.option(
-    "--language", help="The language to train the model for", type=click.Choice(["german", "catalan"]), required=True
-)
+@click.option("--language", help="The language to train the model for", type=click.Choice(LANGUAGES), required=True)
 @click.option("--batch_size", type=int, help="The batch size for training")
 @click.option("--lr", type=float, help="The learning rate for training")
 @click.option("--step_size", type=int, help="The step size for the learning rate scheduler")
