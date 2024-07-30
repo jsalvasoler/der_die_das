@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 
+import pandas as pd
 import torch
 from matplotlib import pyplot as plt
 from sklearn.metrics import (
@@ -77,6 +78,10 @@ def evaluate(model_timestamp: str | None = None) -> None:
     # create directory for the model's evaluation
     eval_dir = os.path.join(EVAL_DIR, f"evaluation_{model_timestamp}")
     os.makedirs(eval_dir, exist_ok=True)
+
+    pd.DataFrame({"word": dataset.not_encoded, "prediction": all_preds, "label": all_labels}).to_csv(
+        os.path.join(eval_dir, "predictions.csv"), index=False
+    )
 
     cm = confusion_matrix(all_labels, all_preds)
     if language == "german":

@@ -37,10 +37,12 @@ class NounsDataset(Dataset):
         self.vocab_size = len(self.CHAR_TO_IDX)
 
         if which == "train":
-            self.words = self.encode_words(train["x"].values)
+            self.not_encoded = train["x"].values
+            self.words = self.encode_words(self.not_encoded)
             self.labels = train["y"].values
         else:
-            self.words = self.encode_words(test["x"].values)
+            self.not_encoded = test["x"].values
+            self.words = self.encode_words(self.not_encoded)
             self.labels = test["y"].values
 
     def encode_words(self, words: list[str]) -> list[list[int]]:
