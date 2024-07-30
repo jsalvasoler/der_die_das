@@ -86,12 +86,12 @@ def train_command(
 
 @cli.command(name="evaluate", help="Evaluate the model")
 @click.option(
-    "--model_time_stamp",
+    "--timestamp",
     help="Timestamp of the model to evaluate. If not provided, the latest model will be evaluated",
 )
-def evaluate_command(model_time_stamp: str | None) -> None:
+def evaluate_command(timestamp: str | None) -> None:
     click.echo("Evaluating the model")
-    evaluate(model_time_stamp)
+    evaluate(timestamp)
 
 
 if __name__ == "__main__":

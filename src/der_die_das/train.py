@@ -56,10 +56,10 @@ def train(settings: dict) -> None:
             loss = criterion(outputs, batch_labels)
             eval_loss += loss.item()
 
-        eval_loss_epoch = eval_loss / len(eval_loader) if len(eval_loader) > 0 else 0
+        val_loss_epoch = eval_loss / len(eval_loader) if len(eval_loader) > 0 else None
         if config.early_stop is not None:
-            if eval_loss_epoch < min_val_loss:
-                min_val_loss = eval_loss_epoch
+            if val_loss_epoch < min_val_loss:
+                min_val_loss = val_loss_epoch
                 epoch_min_loss = 0
             else:
                 epoch_min_loss += 1
@@ -68,8 +68,8 @@ def train(settings: dict) -> None:
                 print(f"Early stopping at epoch {epoch + 1}")
                 break
 
-        epoch_losses.append((train_loss / len(train_loader), eval_loss_epoch))
+        epoch_losses.append((train_loss / len(train_loader), val_loss_epoch))
 
-        print(f"Epoch {epoch + 1}, Loss: {train_loss / len(train_loader)}, Val Loss: {eval_loss_epoch}")
+        print(f"Epoch {epoch + 1}, Loss: {train_loss / len(train_loader)}, Val Loss: {val_loss_epoch}")
 
     model.save_model(epoch_losses, config)

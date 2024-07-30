@@ -104,12 +104,15 @@ def evaluate(model_timestamp: str | None = None) -> None:
     model_dir = os.path.join(MODEL_DIR, f"model_{model_timestamp}")
     with open(os.path.join(model_dir, "epoch_losses.txt")) as f:
         epoch_losses = [line.strip().split(",") for line in f.readlines()]
-        epoch_losses = [[float(train_loss), float(eval_loss)] for train_loss, eval_loss in epoch_losses]
+        epoch_losses = [
+            [float(train_loss), float(val_loss) if val_loss != "None" else None]
+            for train_loss, val_loss in epoch_losses
+        ]
 
     plt.clf()
 
     train_losses = [loss[0] for loss in epoch_losses]
-    eval_losses = [loss[1] for loss in epoch_losses]
+    val_losses = [loss[1] for loss in epoch_losses]
 
     # Plot the learning curve on two different axis
     fig, ax1 = plt.subplots()
@@ -117,7 +120,7 @@ def evaluate(model_timestamp: str | None = None) -> None:
     ax1.set_xlabel("Epoch")
     ax1.set_ylabel("Loss", color="tab:blue")
     ax1.plot(range(1, len(train_losses) + 1), train_losses, color="tab:blue", label="Train Loss")
-    ax1.plot(range(1, len(eval_losses) + 1), eval_losses, color="tab:orange", label="Eval Loss")
+    ax1.plot(range(1, len(val_losses) + 1), val_losses, color="tab:orange", label="Val Loss")
     ax1.tick_params(axis="y", labelcolor="tab:blue")
     ax1.legend(loc="upper left")
 
