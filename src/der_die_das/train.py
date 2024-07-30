@@ -70,6 +70,6 @@ def train(settings: dict) -> None:
 
         epoch_losses.append((train_loss / len(train_loader), val_loss_epoch))
 
-        print(f"Epoch {epoch + 1}, Loss: {train_loss / len(train_loader)}, Val Loss: {val_loss_epoch}")
+        print(f"Epoch {epoch + 1}, Loss: {train_loss / len(train_loader):.4f}, Val Loss: {val_loss_epoch:.4f}")
 
     model.save_model(epoch_losses, config)
