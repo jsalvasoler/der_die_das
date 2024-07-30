@@ -52,10 +52,14 @@ def split_train_and_test(language: str) -> None:
 
     print(words_df.groupby("stratify_label")["stratify_label"].count())
 
-    train_df, test_df = train_test_split(words_df, test_size=0.5, stratify=words_df["stratify_label"], random_state=42)
+    train_df, test_df = train_test_split(
+        words_df, train_size=1500, stratify=words_df["stratify_label"], random_state=42
+    )
 
     train_df = train_df[["x", "y"]]
-    test_df = test_df[["x", "y"]]
+    test_df = test_df[["x", "y"]].sample(n=500, random_state=42)
+
+    print(f"Train and test sizes: {len(train_df)}, {len(test_df)}")
 
     if language == "german":
         train_name = "train.csv"
