@@ -16,11 +16,11 @@ def cli() -> None:
 
 @cli.command(name="process_data", help="Run the data processing pipeling")
 @click.argument("language", type=click.Choice(LANGUAGES))
-@click.option("--rerun_raw_to_processed", is_flag=True, help="Whether to rerun the raw to processed step")
-@click.option("--rerun_train_test_split", is_flag=True, help="Whether to rerun the train test split step")
-def process_data_command(language: str, *, rerun_raw_to_processed: bool, rerun_train_test_split: bool) -> None:
+@click.option("--raw", is_flag=True, help="Whether to rerun the raw to processed step")
+@click.option("--split", is_flag=True, help="Whether to rerun the train test split step")
+def process_data_command(language: str, *, raw: bool, split: bool) -> None:
     click.echo("Running data processing pipeline")
-    process_data(language, rerun_raw_to_processed=rerun_raw_to_processed, rerun_train_test_split=rerun_train_test_split)
+    process_data(language, rerun_raw_to_processed=raw, rerun_train_test_split=split)
 
 
 @cli.command(name="train", help="Train the model")

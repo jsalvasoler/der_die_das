@@ -1202,7 +1202,6 @@
 1204. Seed	Der Samen	Die Samen
 1205. Progress	Der Fortschritt	- 
 1206. Feel	Das Gefühl	Die Gefühle
-1207. Shorts	Die kurze Hose	Die kurze Hosen
 1208. Citizen	Der Bürger	Die Bürger
 1209. Trash	Der Müll	- 
 1210. Log	Der Baumstamm	Die Baumstämme
@@ -2670,7 +2669,6 @@
 2683. Annoyance	Der Ärger	Die Ärgernisse
 2684. Hiss	Das Fauchen	Die Fauchen
 2685. Local	Der Einheimische	Die Einheimischen
-2686. Thud	Das Dumpfe Geräusch	Die Dumpfen Geräusche
 2687. Dismay	Das Entsetzen	(usually uncountable)
 2688. Flour	Das Mehl	(usually uncountable)
 2689. Freak	Der Freak	Die Freaks
@@ -2899,7 +2897,7 @@
 2913. Trooper	Der Soldat	Die Soldaten
 2914. Salvation	Die Rettung	Die Rettungen
 2915. Vet	Der Tierarzt	Die Tierärzte
-2916. Runway	Die Start- und Landebahn	Die Start- und Landebahnen
+2916. Runway	Die Landebahn	Die Landebahnen
 2917. Poppy	Die Mohnblume	Die Mohnblumen
 2919. Lava	Die Lava	(usually uncountable)
 2920. Inspiration	Die Inspiration	Die Inspirationen
@@ -2929,7 +2927,6 @@
 2944. Gypsy	Der Zigeuner	Die Zigeuner
 2945. Imitation	Die Nachahmung	Die Nachahmungen
 2946. Employer	Der Arbeitgeber	Die Arbeitgeber
-2947. Freshman	Der Student im ersten Jahr	Die Studenten im ersten Jahr
 2948. Phenomenon	Das Phänomen	Die Phänomene
 2949. Flute	Die Flöte	Die Flöten
 2950. Greek	Der Grieche	Die Griechen

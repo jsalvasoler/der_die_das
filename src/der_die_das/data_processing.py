@@ -20,6 +20,8 @@ def from_raw_to_processed() -> None:
     words_df[["article", "noun"]] = words_df["singular"].str.split(" ", n=1, expand=True)
 
     words_df["x"] = words_df["noun"].str.lower()
+    print(words_df[words_df.x.str.contains(" ")])
+    assert words_df[words_df.x.str.contains(" ")].empty
 
     words_df["y"] = words_df["article"].str.lower().map({"der": 0, "die": 1, "das": 2}).astype(int)
 
