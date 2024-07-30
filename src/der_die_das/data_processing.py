@@ -101,7 +101,7 @@ def translate_german_to_catalan() -> None:
     from deep_translator import MicrosoftTranslator
 
     translator = MicrosoftTranslator(
-        source="de", target="ca", api_key="f8937130a4574616a8f61b0e50bf03a5", region="italynorth"
+        source="de", target="ca", api_key=os.getenv("MICROSOFT_TRANSLATOR_API_KEY"), region="italynorth"
     )
 
     words_df["sing+plural"] = words_df["singular"] + ", " + words_df["plural"]
@@ -155,7 +155,7 @@ def translate_german_to_croatian() -> None:
     from deep_translator import MicrosoftTranslator
 
     translator = MicrosoftTranslator(
-        source="de", target="hr", api_key="f8937130a4574616a8f61b0e50bf03a5", region="italynorth"
+        source="de", target="hr", api_key=os.getenv("MICROSOFT_TRANSLATOR_API_KEY"), region="italynorth"
     )
 
     words_df["possessive"] = words_df["singular"].apply(
