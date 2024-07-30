@@ -14,7 +14,7 @@ def cli() -> None:
     pass
 
 
-@cli.command(name="process_data", help="Run the data processing pipeling")
+@cli.command(name="process_data", help="Run the data processing pipeline")
 @click.argument("language", type=click.Choice(LANGUAGES))
 @click.option("--raw", is_flag=True, help="Whether to rerun the raw to processed step")
 @click.option("--split", is_flag=True, help="Whether to rerun the train test split step")
