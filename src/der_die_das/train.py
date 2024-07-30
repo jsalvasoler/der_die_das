@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from torch import nn, optim
+from torch import manual_seed, nn, optim
 from torch.utils.data import DataLoader, random_split
 
 from der_die_das.model import Config, TransformerClassifier
@@ -8,6 +8,8 @@ from der_die_das.utils import NounsDataset
 
 
 def train(settings: dict) -> None:
+    manual_seed(42)
+
     language = settings.pop("language")
 
     config = Config(settings, language=language)

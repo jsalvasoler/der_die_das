@@ -20,7 +20,8 @@ from der_die_das.utils import EVAL_DIR, LANGUAGES, MODEL_DIR, NounsDataset
 
 
 def evaluate(model_timestamp: str | None = None) -> None:
-    # Load the model
+    torch.manual_seed(42)
+
     model_dirs = os.listdir(MODEL_DIR)
 
     if model_timestamp is not None:
