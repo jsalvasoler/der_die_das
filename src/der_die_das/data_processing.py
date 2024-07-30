@@ -23,8 +23,10 @@ def from_raw_to_processed() -> None:
 
     words_df["y"] = words_df["article"].str.lower().map({"der": 0, "die": 1, "das": 2}).astype(int)
 
+    words_df = words_df.drop_duplicates(subset=["x"])
+
     print(words_df.groupby("article")["article"].count())
-    print(words_df.head())
+    print(f"Number of words: {len(words_df)}")
 
     words_df.to_csv(os.path.join(DATA_DIR, "german_words_processed.csv"), index=False)
 
@@ -38,7 +40,7 @@ def split_train_and_test(language: str) -> None:
         words_df = pd.read_csv(os.path.join(DATA_DIR, "croatian_words_processed.csv"))
 
     words_df["length"] = words_df["x"].str.len()
-    print(words_df[words_df["length"].isna()])
+    assert words_df[words_df["length"].isna()].empty
 
     words_df["length"] = words_df["length"].clip(lower=3, upper=13)
     if language == "croatian":
@@ -176,7 +178,7 @@ def from_raw_to_processed_croatian() -> None:
         return -1
 
     words_df["y"] = words_df["possessive"].apply(get_gender)
-    assert set(words_df["y"]) == {"moj", "moja", "moje"}
+    assert set(words_df["y"]) == {0, 1, 2}
 
     # remove duplicates
     print(f"Number of words before removing duplicates: {len(words_df)}")
