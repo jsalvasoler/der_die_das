@@ -127,9 +127,12 @@ def evaluate(model_timestamp: str | None = None) -> None:
     ax1.set_xlabel("Epoch")
     ax1.set_ylabel("Loss", color="tab:blue")
     ax1.plot(range(1, len(train_losses) + 1), train_losses, color="tab:blue", label="Train Loss")
-    ax1.plot(range(1, len(val_losses) + 1), val_losses, color="tab:orange", label="Val Loss")
-    ax1.tick_params(axis="y", labelcolor="tab:blue")
-    ax1.legend(loc="upper left")
-
+    if any(val_losses):
+        ax1.plot(range(1, len(val_losses) + 1), val_losses, color="tab:orange", label="Val Loss")
+        ax1.tick_params(axis="y", labelcolor="tab:blue")
+        ax1.legend(loc="upper left")
+    xticks = range(1, len(train_losses) + 1, 2)
+    ax1.set_xticks(xticks)
+    ax1.set_xticklabels(xticks)
     plt.title("Learning Curve")
     plt.savefig(os.path.join(eval_dir, f"learning_curve_{model_timestamp}.png"))
