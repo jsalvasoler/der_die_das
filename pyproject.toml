@@ -30,7 +30,9 @@ dependencies = [
     "scikit-learn",
     "torch",
     "matplotlib",
+    "seaborn",
     "deep-translator",
+    "ipykernel",
 ]
 
 [project.urls]
