@@ -71,10 +71,11 @@ def evaluate(model_timestamp: str | None = None) -> None:
     recall = recall_score(all_labels, all_preds, average="weighted")
     f1 = f1_score(all_labels, all_preds, average="weighted")
 
-    print(f"Accuracy: {accuracy:.4f}")
-    print(f"Precision: {precision:.4f}")
-    print(f"Recall: {recall:.4f}")
-    print(f"F1 Score: {f1:.4f}")
+    print(f"Model {model_timestamp} ({language})")
+    print(f"- Accuracy: {accuracy:.4f}")
+    print(f"- Precision: {precision:.4f}")
+    print(f"- Recall: {recall:.4f}")
+    print(f"- F1 Score: {f1:.4f}")
 
     # create directory for the model's evaluation
     eval_dir = os.path.join(EVAL_DIR, f"evaluation_{model_timestamp}")
