@@ -7,6 +7,7 @@ The idea is to use the model to answer the following research question: "How int
 ## Table of Contents
 
 - [Installing and running](#installing-and-running)
+- [Data](#data)
 - [License](#license)
 
 ## Installing and running
@@ -19,7 +20,7 @@ pip install hatch
 
 Hatch will create a virtual environment for you and install all the dependencies. You do not need to create a virtual environment manually.
 
-To run the project, you can use the command
+To run the different project modules, this is the general syntax:
     
 ```bash
 hatch run der_die_das [OPTIONS] COMMAND [ARGS]
@@ -45,7 +46,7 @@ A nice byproduct of this project is that it contains "noun" datasets for German,
 The German dataset was obtained from this source:
 - https://frequencylists.blogspot.com/2015/12/the-2000-most-frequent-german-nouns.html
 
-The Croatian and Catalan datasets were obtained by translating the German dataset using the Microsoft Translator API (https://www.microsoft.com/en-us/translator).
+The Croatian and Catalan datasets were obtained by translating the German dataset using the [Microsoft Translator API](https://www.microsoft.com/en-us/translator).
 
 _Note_: the datasets were not manually curated, so there might be some errors. For training a model, the quality is good enough, but for linguistic purposes, you might want to clean the datasets.
 
